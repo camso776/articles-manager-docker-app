@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  springbootapp:
+    image: 'springboot-app'
+    build:
+      context: ./articlesmanager-app-back
+    container_name: spring-app
+    depends_on:
+      - postgresdb
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/artsmanager
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgresql
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "4301:8080"
+
+  postgresdb:
+    image: 'postgres:13.1-alpine'
+    container_name: postgresql-db
+    environment:
+      - POSTGRES_DB=artsmanager
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresql
+    ports:
+      - "5433:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+  web:
+    container_name: articlesmanager_ui
+    image: project/articlesmanager
+    build: ./articlesmanager-app-front
+    volumes:
+      - web-articlesmanager:/usr/local/app
+    ports:
+      - "4201:4200"
+    command: >
+      bash -c "npm start"
+    depends_on:
+      - springbootapp
+volumes:
+  dbdata:
+  web-articlesmanager:
